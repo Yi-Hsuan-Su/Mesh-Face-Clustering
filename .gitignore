@@ -107,9 +107,4 @@ OpenMesh_EX/Debug/MyForm.obj
 *.tlog
 *.cache
 *.pdb
-Debug/HKOGLPanel.dll
-Debug/OpenMesh_EX.exe.metagen
-Debug/OpenMeshCored.dll
-failEdgeSaperate.cpp
-Release/HKOGLPanel.dll
-Release/OpenMeshCore.dll
+
