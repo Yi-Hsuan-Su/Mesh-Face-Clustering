@@ -1128,7 +1128,8 @@ void Tri_Mesh::planedistcluster(Cluster *cl , int idx  , Cluster *output , int *
 	OpenMesh::Vec3d p_normal;
 	OpenMesh::Vec3d p_center;
 	double dist;
-	for (int i = 0; i <idx ; i++) 
+	for (int i = 0; i <idx
+		; i++) 
 	{
 		for (int j = 0; j < cl[i].faceid.size(); j++) 
 		{
@@ -1143,9 +1144,9 @@ void Tri_Mesh::planedistcluster(Cluster *cl , int idx  , Cluster *output , int *
 					if (facecheck[cl[i].faceid[k]] == false)
 					{
 						dist = calplanedist(fd[cl[i].faceid[j]].getFaceNormal(), fd[cl[i].faceid[j]].getfcenter(), fd[cl[i].faceid[k]].getfcenter());
-						std::cout << dist << std::endl;
+						//std::cout << dist << std::endl;
 						
-						if (dist <0.05)
+						if (dist <0.03)
 						{
 							
 							facecheck[cl[i].faceid[k]] = true;
@@ -1269,6 +1270,22 @@ void Tri_Mesh::facepopCluster()
 		fc[i].ColorID = 11111;
 	}
 	count = 0;
+	/*
+	for (int i = 0; i < index; i++)
+	{
+
+		clusterMap[normcacl[i].faceid[0]] = false;
+		represent.push_back(normcacl[i].faceid[0]);
+		//faceCheck[normcacl[i].faceid[0]] = count++;
+		std::vector <faceColor> color;
+		fc[normcacl[i].faceid[0]].Color[0] = colormap[i][0];
+		fc[normcacl[i].faceid[0]].Color[1] = colormap[i][1];
+		fc[normcacl[i].faceid[0]].Color[2] = colormap[i][2];
+		fc[normcacl[i].faceid[0]].ColorID = normcacl[i].faceid[0];
+		color.push_back(fc[normcacl[i].faceid[0]]);
+	}
+	*/
+
 	
 	for (int i = 0; i < index; i++)
 	{
@@ -1285,7 +1302,7 @@ void Tri_Mesh::facepopCluster()
 	}
 
 	
-
+	
 
 	do {
 		//count++;
@@ -1317,11 +1334,12 @@ void Tri_Mesh::facepopCluster()
 			{
 				cadarea[maxcadid].faceid.push_back(i);
 			}
-			fc[i].Color = fc[maxdotid].Color;
-			fc[i].ColorID = maxdotid;
-			faceCheck[i] = count;
-			clusterMap[i] = false;
 
+				fc[i].Color = fc[maxdotid].Color;
+				fc[i].ColorID = maxdotid;
+				faceCheck[i] = count;
+				clusterMap[i] = false;
+			
 		}
 		clusterVec.push_back(clusterMap);
 
@@ -1329,7 +1347,7 @@ void Tri_Mesh::facepopCluster()
 	
 
 	std::cout << "cluster: " << index<<std::endl;
-	bool sw = true;
+	bool sw =true;
 	if (sw)
 	{
 		planedistcluster(cadarea, index, output, &outputidx);
@@ -1374,9 +1392,9 @@ void Tri_Mesh::facepopCluster()
 		std::cout <<std::endl<< "Clusters " << outputidx << std::endl;
 		for (int i = 0; i < outputidx; i++) 
 		{
-			std::cout << "cluster  " << i << "   num  " << output[i].faceid.size() <<std::endl;
+			//std::cout << "cluster  " << i << "   num  " << output[i].faceid.size() <<std::endl;
 		}
-		std::cout << std::endl;
+	//	std::cout << std::endl;
 	}
 	tend = std::clock();
 
