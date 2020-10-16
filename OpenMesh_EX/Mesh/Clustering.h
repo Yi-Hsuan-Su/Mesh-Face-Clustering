@@ -2,13 +2,13 @@
 #include <OpenMesh/Core/IO/MeshIO.hh>
 #include "FaceData.h"
 
-typedef struct  Cluster
+struct  Cluster
 {
 	OpenMesh::Vec3d norm;
 	int count = 0;
 	std::vector<int> faceid;
 	double facearea = 0;
-}Cluster;
+};
 
 
 inline double calecldistance(OpenMesh::Vec3d cur, OpenMesh::Vec3d gl)
@@ -29,6 +29,7 @@ inline double calplanedist( OpenMesh::Vec3d normal , OpenMesh::Vec3d center,Open
 		dist =abs( planeequation / normalize);
 		return dist;
 }
+
 
 
 inline void  kmeans_init(int size, int K, int* pick)
@@ -214,9 +215,9 @@ inline int find_faceid(int targetid , Cluster *cl , int index)
 	return -1;
 }
 
-inline int find_normal(Cluster* norcarray, OpenMesh::Vec3d curvec, int size)
+inline int find_normal(std::vector<Cluster> norcarray, OpenMesh::Vec3d curvec)
 {
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < norcarray.size(); i++) {
 		if (OpenMesh::dot(curvec, norcarray[i].norm) >= 0.90)
 		{
 			return i;

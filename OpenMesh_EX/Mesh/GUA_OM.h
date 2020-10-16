@@ -11,10 +11,11 @@
 #include <gl/gl.h>
 #include <gl/glu.h>
 #include "Clustering.h"
+#include"MeshReconstruct.h"
 #include <fstream>
 #include <sstream>
 #include "FaceData.h"
-
+enum ColorState;
 
 struct Face_InnerAngle
 {
@@ -179,6 +180,7 @@ namespace OMP//OpenMesh Polygonal mesh
 		//資料成員
 	public:
 		MyMesh Mesh;													//OpenMesh instance
+		MyMesh bboxmesh;
 	private:
 		vector< sp_p > sp_p_list;
 		vector< sp_v > sp_v_list;
@@ -231,7 +233,7 @@ public:
 			for (int j = 0; j < 3; j++)
 			{
 				colormap[i][j] = (double)rand() / (RAND_MAX + 1.0);
-				std::cout << colormap[i][j] << std::endl;
+				//std::cout << colormap[i][j] << std::endl;
 			}
 		}
 	}
@@ -258,16 +260,15 @@ public:
 	std::map <int, std::map<int, bool>> clusterID;
 	std::map <int, Point> fn;
 	std::map <int, bool> usedColor;
-
+	Cluster repcl[300];
 	std::vector<std::map <int, int>> containID;
 	std::map <Point, float> normalcluster;
 	std::pair<Point, int> maxNormalArea;
 	std::vector <std::map<int, bool>> finalcluster;
 	std::vector <Tri_Mesh> Allmeshs;
 	double** colormap;
-	float tstart , tend;
+	float tstart , tend ;
 	std::vector<OpenMesh::Vec3d> ctr;
-
 	Point centerPoint;
 	std::string objFile = "";
 	int state;
@@ -281,7 +282,9 @@ public:
 	void setFaceColor();
 	void setCloseFaceColor();
 	void calFaceData();
-	void planedistcluster(Cluster* cl, int idx, Cluster* output, int *outputidx);
+	std::vector <Cluster > planedistcluster(std::vector <Cluster >cl, std::vector <Cluster > &output);
+	std::vector<Tri_Mesh> bboxmesh;
+	void contructbbox();
 	int facefaceCount();
 	void faceCluster(bool close);
 	void findBoundary();
@@ -293,7 +296,7 @@ public:
 	bool saveConnectFace(char* path, char* fileName);
 	void passObjtoUnity(char* str, int len);
 	void saperateFace();
-
+	void hypothesismesh();
 private:
 	void facefaceCount(std::map <int, int>& faceCheck, int f_id, int count);
 	void setCloseFaceColor(int& count, int f_id, std::vector <int>& faceCheck);
@@ -315,4 +318,3 @@ bool SaveFile(std::string _fileName, Tri_Mesh* _mesh); //儲存mesh資料
 /*初始化view port設定函式*/
 
 #endif
-

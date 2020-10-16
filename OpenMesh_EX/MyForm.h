@@ -94,7 +94,7 @@ namespace OpenMesh_EX {
 	private: System::Windows::Forms::ToolStripMenuItem^ saveNewModelToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^ saveNewModelMtlToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^ faceClusterpopulosityToolStripMenuItem;
-
+	private: System::Windows::Forms::ToolStripMenuItem^ hypothesismeshToolStripMenuItem;
 
 
 
@@ -149,6 +149,7 @@ namespace OpenMesh_EX {
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->backgroundWorker1 = (gcnew System::ComponentModel::BackgroundWorker());
 			this->faceClusterpopulosityToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->hypothesismeshToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->menuStrip1->SuspendLayout();
 			this->Setting->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->ScaleNum))->BeginInit();
@@ -215,10 +216,10 @@ namespace OpenMesh_EX {
 			// 
 			// modeToolStripMenuItem
 			// 
-			this->modeToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) {
+			this->modeToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(7) {
 				this->connectColorToolStripMenuItem,
 					this->closeFaceToolStripMenuItem, this->nonCloseFaceToolStripMenuItem, this->faceClusterToolStripMenuItem, this->faceClusterCloseFaceToolStripMenuItem,
-					this->faceClusterpopulosityToolStripMenuItem
+					this->faceClusterpopulosityToolStripMenuItem , this->hypothesismeshToolStripMenuItem
 			});
 			this->modeToolStripMenuItem->Name = L"modeToolStripMenuItem";
 			this->modeToolStripMenuItem->Size = System::Drawing::Size(54, 20);
@@ -458,6 +459,13 @@ namespace OpenMesh_EX {
 			this->faceClusterpopulosityToolStripMenuItem->Size = System::Drawing::Size(204, 22);
 			this->faceClusterpopulosityToolStripMenuItem->Text = L"faceCluster(populosity)";
 			this->faceClusterpopulosityToolStripMenuItem->Click += gcnew System::EventHandler(this, &MyForm::faceClusterpopulosityToolStripMenuItem_Click);
+			//
+			//hypothesismesh
+			//
+			this->hypothesismeshToolStripMenuItem->Name = L"hypothesismeshToolStripMenuItem";
+			this->hypothesismeshToolStripMenuItem->Size = System::Drawing::Size(204, 22);
+			this->hypothesismeshToolStripMenuItem->Text = L"Hypothesis Mesh";
+			this->hypothesismeshToolStripMenuItem->Click += gcnew System::EventHandler(this, &MyForm::hypothesismeshToolStripMenuItem_Click);
 			// 
 			// MyForm
 			// 
@@ -603,6 +611,7 @@ private: System::Void openModelDialog_FileOk(System::Object^  sender, System::Co
 		std::cout << filename << std::endl;
 	mesh->calFaceData();
 	mesh->facefaceCount();
+	mesh->contructbbox();
 	hkoglPanelControl1->Invalidate();
 }
 private: System::Void saveModelToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e)
@@ -661,7 +670,11 @@ private: System::Void faceClusterCloseFaceToolStripMenuItem_Click(System::Object
 	{
 		mesh->facepopCluster();
 	}
-
+	private:System::Void hypothesismeshToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
+	{
+		//mesh->bboxmesh->hypothesismesh();
+		mesh->hypothesismesh();
+	}
 
 private: System::Void hScrollBar1_Scroll(System::Object^ sender, System::Windows::Forms::ScrollEventArgs^ e) 
 {
