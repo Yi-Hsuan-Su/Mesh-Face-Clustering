@@ -611,7 +611,7 @@ private: System::Void openModelDialog_FileOk(System::Object^  sender, System::Co
 		std::cout << filename << std::endl;
 	mesh->calFaceData();
 	mesh->facefaceCount();
-	mesh->contructbbox();
+	//mesh->contructbbox();
 	hkoglPanelControl1->Invalidate();
 }
 private: System::Void saveModelToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e)
@@ -624,7 +624,7 @@ private: System::Void saveModelDialog_FileOk(System::Object^  sender, System::Co
 	std::string filename;
 	MarshalString(saveModelDialog->FileName, filename);
 
-	if (SaveFile(filename, mesh))
+	if (SaveFile(filename, mesh->hypmesh))
 		std::cout << filename << std::endl;
 }
 
@@ -673,7 +673,7 @@ private: System::Void faceClusterCloseFaceToolStripMenuItem_Click(System::Object
 	private:System::Void hypothesismeshToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
 	{
 		//mesh->bboxmesh->hypothesismesh();
-		mesh->hypothesismesh();
+		 mesh->remesh();
 	}
 
 private: System::Void hScrollBar1_Scroll(System::Object^ sender, System::Windows::Forms::ScrollEventArgs^ e) 

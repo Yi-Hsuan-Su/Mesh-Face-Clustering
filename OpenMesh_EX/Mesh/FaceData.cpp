@@ -26,9 +26,18 @@ void faceData::addvertex(OpenMesh::Vec3d vertex, int vid)
 }
 void faceData::caclcenter()
 {
-	center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0]) / 3;
-	center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1]) / 3;
-	center[2] = (vertices[0][2] + vertices[1][2] + vertices[2][2]) / 3;
+	if (vertices.size() == 3)
+	{
+		center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0]) / 3;
+		center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1]) / 3;
+		center[2] = (vertices[0][2] + vertices[1][2] + vertices[2][2]) / 3;
+	}
+	else 
+	{
+		center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0] + vertices[3][0] ) /4;
+		center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1] + vertices[3][1]) / 4;
+		center[2] = (vertices[0][2] + vertices[1][2] + vertices[2][2] + vertices[3][2]) / 4;
+	}
 }
 void faceData::setFaceNormal(OpenMesh::Vec3d normal, OpenMesh::Vec3d symmetric)
 {

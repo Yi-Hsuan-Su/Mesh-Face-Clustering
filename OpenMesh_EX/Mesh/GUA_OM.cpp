@@ -783,7 +783,7 @@ void Tri_Mesh::calFaceData()
 	VertexIter VIter;
 
 	for (VIter = vertices_begin(); VIter != vertices_end(); VIter++) {
-		std::cout << VIter.handle().idx() << std::endl;
+	//	std::cout << VIter.handle().idx() << std::endl;
 		objVertices.push_back(point(VIter.handle()));
 	}
 	for (f_it = faces_begin(); f_it != faces_end(); ++f_it)
@@ -793,12 +793,14 @@ void Tri_Mesh::calFaceData()
 		OpenMesh::Vec3d fnorm = calc_face_normal(f_it.handle());
 		for (fv_it = fv_iter(f_it); fv_it; ++fv_it)
 		{
+		//	std::cout << fv_it.handle().idx()<< "  ";
 			//glNormal3dv(normal(fv_it.handle()));
 			//glVertex3dv((point(fv_it.handle()) / scale).data());
 			OpenMesh::Vec3d p1 = point(fv_it.handle());
 			OpenMesh::Vec3d norm = normal(fv_it.handle());
 			face.addvertex(p1, fv_it.handle().idx());
 		}
+		//std::cout << std::endl;
 		face.cal_area();
 		face.caclcenter();
 		face.checkData();
@@ -2015,7 +2017,125 @@ void Tri_Mesh::saperateFace()
 	//std::cout << "------------face_saperate------------\n";
 }
 
+bool Tri_Mesh::isintriangle( Tri_Mesh *mesh , FIter fiter, OpenMesh::Vec3d pt )
+{
+	OpenMesh::Vec3d na, nb, nc;
+	float ra, rb, rc, rs;
+	float a, b, c , s;
+	std::vector <OpenMesh::Vec3d> fv;
+	
+	for (FVIter fvite = mesh->fv_iter(fiter); fvite; ++fvite)
+	{
+		//std::cout << "id  " <<  fvite.handle().idx() << "   ";
+		fv.push_back(mesh->point(fvite));
+	}
 
+	
+	na = OpenMesh::cross( fv[0]-pt,  fv[1]-pt);
+	nb = OpenMesh::cross(fv[1] - pt, fv[2] - pt);
+	nc = OpenMesh::cross(fv[2] - pt, fv[0] - pt);
+	ra = 0.5 * sqrtf(pow(na[0], 2)  + pow(na[1], 2) + pow(na[2], 2));
+	rb = 0.5 * sqrtf(pow(nb[0], 2) + pow(nb[1], 2) + pow(nb[2], 2));
+	rc = 0.5  * sqrtf(pow(nc[0], 2) + pow(nc[1], 2) + pow(nc[2], 2));
+	
+	
+	rs =mesh->fd[fiter.handle().idx()].getArea();
+
+	std::cout << "rs " << rs << std::endl;
+	std::cout << "abc " << ra + rb + rc << std::endl;
+	
+	a = ra / rs;
+	b = rb / rs;
+	c = rc / rs;
+	s = a + b + c;
+	if (   0.95< s && s <=1.0 && a > 0 && b > 0 && c > 0)
+	{
+		std::cout << "s " << s << std::endl;
+		return false;
+	}
+	else 
+	{
+		
+		//std::cout << "a " << a << std::endl;
+		//std::cout << "b " << b << std::endl;
+		//std::cout << "c " << c << std::endl;
+		//std::cout << "s " << c << std::endl;
+		std::cout << std::endl;
+		return true;
+	}
+}
+
+void Tri_Mesh::remesh()
+{
+
+	hypmesh = new Tri_Mesh;
+	bool out;
+	ReadFile("D:/Mesh-Face-Clustering/OpenMesh_EX/test.obj", hypmesh);
+	if (hypmesh)
+	{
+		std::cout << "load success " << std::endl;
+	}
+	
+	hypmesh->calFaceData();
+
+
+	
+	for (FIter f_iter = hypmesh->faces_begin(); f_iter != hypmesh->faces_end(); ++f_iter)
+	{
+		
+	for (int i = 0; i < fd.size(); i++)
+		{
+			out = isintriangle(hypmesh, f_iter, fd[i].getfcenter() );
+			if (!out)
+			{
+				break;
+			}
+		}
+
+		if (out)
+		{
+			hypmesh->delete_face(f_iter, true);
+			hypmesh->garbage_collection();
+			f_iter = hypmesh->faces_begin();
+		}	
+
+	}
+	
+	std::cout << std::endl << "face size  " << hypmesh->n_faces() << std::endl;
+	/*if (SaveFile("D:/Mesh-Face-Clustering/OpenMesh_EX/final.obj ", hypmesh))
+	{
+		std::cout << "Save file successful " << std::endl;
+	}
+	else 
+	{
+		std::cout << "Save file failed " << std::endl;
+	}*/
+	/*
+	int count = 0;
+	for (FIter f_iter = faces_begin(); f_iter != faces_end(); ++f_iter) 
+	{
+		count = 0;
+		for( FFIter ffit = ff_begin(f_iter); ffit ; ++ffit)
+		{
+			count++;
+		}
+		for (FEIter fe_iter = fe_begin(f_iter); fe_iter; ++fe_iter) 
+		{
+			HalfedgeHandle ehalf = halfedge_handle(fe_iter, 1);
+
+		}
+
+		std::cout << "count " << count << std::endl;
+		if ( count ==1 || count ==0) 
+		{
+			delete_face(f_iter);
+			garbage_collection();
+			f_iter = faces_begin();
+		}
+	
+	}
+	*/
+}
 
 void Tri_Mesh::findBoundary(int fid)
 {

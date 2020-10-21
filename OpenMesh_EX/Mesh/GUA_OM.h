@@ -282,6 +282,10 @@ public:
 	void setFaceColor();
 	void setCloseFaceColor();
 	void calFaceData();
+
+	bool isintriangle(Tri_Mesh *mesh ,FIter fiter, OpenMesh::Vec3d pt );
+	void remesh();
+	Tri_Mesh* hypmesh;
 	std::vector <Cluster > planedistcluster(std::vector <Cluster >cl, std::vector <Cluster > &output);
 	std::vector<Tri_Mesh> bboxmesh;
 	void contructbbox();
