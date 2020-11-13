@@ -2,20 +2,22 @@
 #include <OpenMesh/Core/IO/MeshIO.hh>
 #include "FaceData.h"
 
-typedef struct  Cluster
+struct  Cluster
 {
 	OpenMesh::Vec3d norm;
 	int count = 0;
 	std::vector<int> faceid;
 	double facearea = 0;
-}Cluster;
+};
 
 
 inline double calecldistance(OpenMesh::Vec3d cur, OpenMesh::Vec3d gl)
 {
 	// sqrt(pow((gl[0] - cur[0]), 2) + pow((gl[1] - cur[1]), 2) + pow((gl[2] - cur[2]), 2));
 	//std::cout << "dist  " << sqrt(pow((gl[0] - cur[0]), 2) + pow((gl[1] - cur[1]), 2) + pow((gl[2] - cur[2]), 2)) << std::endl;
-	return pow((gl[0] - cur[0]), 2) + pow((gl[1] - cur[1]), 2) + pow((gl[2] - cur[2]), 2);
+	//std::cout << cur <<  std::endl;
+	//std::cout << gl << std::endl;
+	return sqrt( pow((cur[0]- gl[0] ), 2) + pow(( cur[1]- gl[1] ), 2) + pow(( cur[2] - gl[2] ), 2)) ;
 }
 
 inline double calplanedist( OpenMesh::Vec3d normal , OpenMesh::Vec3d center,OpenMesh::Vec3d qpoint)
@@ -29,6 +31,7 @@ inline double calplanedist( OpenMesh::Vec3d normal , OpenMesh::Vec3d center,Open
 		dist =abs( planeequation / normalize);
 		return dist;
 }
+
 
 
 inline void  kmeans_init(int size, int K, int* pick)
@@ -214,9 +217,9 @@ inline int find_faceid(int targetid , Cluster *cl , int index)
 	return -1;
 }
 
-inline int find_normal(Cluster* norcarray, OpenMesh::Vec3d curvec, int size)
+inline int find_normal(std::vector<Cluster> norcarray, OpenMesh::Vec3d curvec)
 {
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < norcarray.size(); i++) {
 		if (OpenMesh::dot(curvec, norcarray[i].norm) >= 0.90)
 		{
 			return i;

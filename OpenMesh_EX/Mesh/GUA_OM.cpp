@@ -9,6 +9,7 @@ namespace OMT
 		request_edge_status();
 		request_face_status();
 	}
+
 	Model::~Model()
 	{
 		release_vertex_status();
@@ -782,7 +783,7 @@ void Tri_Mesh::calFaceData()
 	VertexIter VIter;
 
 	for (VIter = vertices_begin(); VIter != vertices_end(); VIter++) {
-		std::cout << VIter.handle().idx() << std::endl;
+	//	std::cout << VIter.handle().idx() << std::endl;
 		objVertices.push_back(point(VIter.handle()));
 	}
 	for (f_it = faces_begin(); f_it != faces_end(); ++f_it)
@@ -792,12 +793,14 @@ void Tri_Mesh::calFaceData()
 		OpenMesh::Vec3d fnorm = calc_face_normal(f_it.handle());
 		for (fv_it = fv_iter(f_it); fv_it; ++fv_it)
 		{
+		//	std::cout << fv_it.handle().idx()<< "  ";
 			//glNormal3dv(normal(fv_it.handle()));
 			//glVertex3dv((point(fv_it.handle()) / scale).data());
 			OpenMesh::Vec3d p1 = point(fv_it.handle());
 			OpenMesh::Vec3d norm = normal(fv_it.handle());
 			face.addvertex(p1, fv_it.handle().idx());
 		}
+		//std::cout << std::endl;
 		face.cal_area();
 		face.caclcenter();
 		face.checkData();
@@ -1121,15 +1124,125 @@ void Tri_Mesh::faceCluster(bool close)
 }
 
 
+void Tri_Mesh::contructbbox()
+{
+	double xmax = -10000, xmin = 10000, ymax = -10000, ymin = 10000, zmax = -1000, zmin = 1000;
 
-void Tri_Mesh::planedistcluster(Cluster *cl , int idx  , Cluster *output , int *outputidx) 
+	for (int i = 0; i < objVertices.size();i++)
+	{
+		if (objVertices[i][0]> xmax)
+		{
+			xmax = objVertices[i][0];
+		}
+		if (objVertices[i][0] < xmin)
+		{
+			xmin = objVertices[i][0];
+		}
+		//----------------
+		if (objVertices[i][1] > ymax)
+		{
+			ymax = objVertices[i][1];
+		}
+		if (objVertices[i][1] < ymin)
+		{
+			ymin = objVertices[i][1];
+		}
+		//---------------------
+		if (objVertices[i][2] > zmax)
+		{
+			zmax = objVertices[i][2];
+		}
+		if (objVertices[i][2] < zmin)
+		{
+			zmin = objVertices[i][2];
+		}
+	
+	}
+	float delta =sqrtf( pow((xmax - xmin),2 )+ pow((ymax - ymin),2) + pow((zmax - zmin),2)) *(0.5)*(0.05f);
+
+	float bxmin = xmin - delta  ,  bxmax = xmax+delta;
+	float bymin = ymin - delta, bymax = ymax + delta;
+	float bzmin = zmin - delta, bzmax = zmax + delta;
+
+	Tri_Mesh tmpmesh ;
+
+
+	Tri_Mesh::VertexHandle vhandle[8];
+
+	vhandle[0] = tmpmesh.add_vertex( Tri_Mesh::Point(xmin, ymin, zmin));
+	vhandle[1] =  tmpmesh.add_vertex(Tri_Mesh::Point(xmax, ymin, zmin));
+	vhandle[2] =  tmpmesh.add_vertex(Tri_Mesh::Point(xmax, ymin, zmax));
+	vhandle[3] =  tmpmesh.add_vertex(Tri_Mesh::Point(xmin, ymin, zmax));
+	vhandle[4] =  tmpmesh.add_vertex(Tri_Mesh::Point(xmax, ymax, zmax));
+	vhandle[5] =  tmpmesh.add_vertex(Tri_Mesh::Point(xmax, ymax, zmin));
+	vhandle[6] =  tmpmesh.add_vertex(Tri_Mesh::Point(xmin, ymax, zmin));
+	vhandle[7] =  tmpmesh.add_vertex(Tri_Mesh::Point(xmin, ymax, zmax));
+	std::vector<Tri_Mesh::VertexHandle>  face_vhandles;
+	face_vhandles.clear();
+	face_vhandles.push_back(vhandle[0]);
+	face_vhandles.push_back(vhandle[1]);
+	face_vhandles.push_back(vhandle[2]);
+	face_vhandles.push_back(vhandle[3]);
+	 tmpmesh.add_face(face_vhandles);
+
+	face_vhandles.clear();
+	face_vhandles.push_back(vhandle[1]);
+	face_vhandles.push_back(vhandle[5]);
+	face_vhandles.push_back(vhandle[4]);
+	face_vhandles.push_back(vhandle[2]);
+	 tmpmesh.add_face(face_vhandles);
+	face_vhandles.clear();
+	face_vhandles.push_back(vhandle[1]);
+	face_vhandles.push_back(vhandle[0]);
+	face_vhandles.push_back(vhandle[6]);
+	face_vhandles.push_back(vhandle[5]);
+	 tmpmesh.add_face(face_vhandles);
+	face_vhandles.clear();
+	face_vhandles.push_back(vhandle[4]);
+	face_vhandles.push_back(vhandle[5]);
+	face_vhandles.push_back(vhandle[6]);
+	face_vhandles.push_back(vhandle[7]);
+	 tmpmesh.add_face(face_vhandles);
+	face_vhandles.clear();
+	face_vhandles.push_back(vhandle[0]);
+	face_vhandles.push_back(vhandle[3]);
+	face_vhandles.push_back(vhandle[7]);
+	face_vhandles.push_back(vhandle[6]);
+	 tmpmesh.add_face(face_vhandles);
+	face_vhandles.clear();
+	face_vhandles.push_back(vhandle[2]);
+	face_vhandles.push_back(vhandle[4]);
+	face_vhandles.push_back(vhandle[7]);
+	face_vhandles.push_back(vhandle[3]);
+	 tmpmesh.add_face(face_vhandles);
+
+	 bboxmesh.push_back(tmpmesh);
+
+	 std::cout << "Contruct Boundary box successful " << std::endl;
+	try
+	{
+		if (!OpenMesh::IO::write_mesh(tmpmesh, "bboxmesh.obj"))
+		{
+			std::cerr << "Cannot write mesh to file 'output.off'" << std::endl;
+		}
+		std::cout << "Contruct Boundary box successful " << std::endl;
+	}
+	catch (std::exception& x)
+	{
+		std::cerr << x.what() << std::endl;
+	}
+}
+
+
+
+std::vector <Cluster > Tri_Mesh::planedistcluster(std::vector <Cluster > cl , std::vector <Cluster > &output )
 {
 	std::map<int, bool> facecheck;
 	OpenMesh::Vec3d p_normal;
 	OpenMesh::Vec3d p_center;
+
 	double dist;
-	for (int i = 0; i <idx
-		; i++) 
+	for (int i = 0; i <cl.size() ; i++) 
 	{
 		for (int j = 0; j < cl[i].faceid.size(); j++) 
 		{
@@ -1139,6 +1252,7 @@ void Tri_Mesh::planedistcluster(Cluster *cl , int idx  , Cluster *output , int *
 		{
 			if (facecheck[cl[i].faceid[j]]==false)
 			{
+				Cluster tmp;
 				for (int k = 0; k < cl[i].faceid.size(); k++) 
 				{
 					if (facecheck[cl[i].faceid[k]] == false)
@@ -1146,15 +1260,16 @@ void Tri_Mesh::planedistcluster(Cluster *cl , int idx  , Cluster *output , int *
 						dist = calplanedist(fd[cl[i].faceid[j]].getFaceNormal(), fd[cl[i].faceid[j]].getfcenter(), fd[cl[i].faceid[k]].getfcenter());
 						//std::cout << dist << std::endl;
 						
-						if (dist <0.03)
+						if (dist <1)//0.08
 						{
-							
 							facecheck[cl[i].faceid[k]] = true;
-							output[*outputidx].faceid.push_back(cl[i].faceid[k]);
+							//output[*outputidx].faceid.push_back(cl[i].faceid[k]);
+							tmp.faceid.push_back(cl[i].faceid[k]);
 						}
 					}
 				}
-				*outputidx += 1;
+				output.push_back(tmp);
+				//*outputidx += 1;
 			}
 		}
 
@@ -1162,7 +1277,7 @@ void Tri_Mesh::planedistcluster(Cluster *cl , int idx  , Cluster *output , int *
 
 
 
-
+	return output;
 }
 
 
@@ -1171,13 +1286,13 @@ void Tri_Mesh::facepopCluster()
 	tstart = std::clock();
 	calFaceData();
 
-	Cluster normcacl[10000];
+	std::vector<Cluster> normcacl;
 	int index = 0;
 
 	int getindex = 0;
 	for (int i = 0; i < fd.size(); i++) {
 
-		getindex = find_normal(normcacl, fd[i].getFaceNormal(), index);
+		getindex = find_normal(normcacl, fd[i].getFaceNormal());
 		if (getindex != -1)
 		{
 			normcacl[getindex].count++;
@@ -1185,13 +1300,18 @@ void Tri_Mesh::facepopCluster()
 		}
 		else
 		{
-			normcacl[index].norm = fd[i].getFaceNormal();
-			normcacl[index].faceid.push_back(fd[i].getID());
-			normcacl[index].count++;
-			index++;
+			Cluster tmp;
+			tmp.norm = fd[i].getFaceNormal();
+			tmp.faceid.push_back(fd[i].getID());
+			tmp.count += 1;
+			normcacl.push_back(tmp);
+			//normcacl[index].norm = fd[i].getFaceNormal();
+		//	normcacl[index].faceid.push_back(fd[i].getID());
+			//normcacl[index].count++;
+			//index++;
 		}
 	}
-	qsort(normcacl, index, sizeof(Cluster), pcompare);
+	qsort(&normcacl[0], normcacl.size(), sizeof(Cluster), pcompare);
 	std::cout << std::endl << "pop count" << "Face : " << fd.size() << std::endl;
 	/*
 	for (int i = 0; i < index; i++) {
@@ -1205,7 +1325,7 @@ void Tri_Mesh::facepopCluster()
 
 	}*/
 	int sum = 0;
-	for (int i = 0; i < index; i++)
+	for (int i = 0; i <normcacl.size(); i++)
 	{
 		sum += normcacl[i].count;
 	}
@@ -1227,12 +1347,12 @@ void Tri_Mesh::facepopCluster()
 	double maxarea = -100;
 	int maxareaid = 0;
 	int outputidx = 0;
-	Cluster cadarea[100];
-	Cluster output[1000];
+	std::vector<Cluster> cadarea;
+	std::vector<Cluster> output ;
 	// 先只以normal做分群 -> represent
 	std::map <int, bool> clusterMap;
 	
-	for (int i = 0; i < index; i++)
+	for (int i = 0; i <normcacl.size(); i++)
 	{
 		maxarea = -100;
 		for (int j = 0; j < normcacl[i].faceid.size(); j++)
@@ -1243,24 +1363,29 @@ void Tri_Mesh::facepopCluster()
 				maxareaid = normcacl[i].faceid[j];
 			}
 		}
-		cadarea[i].faceid.push_back(maxareaid);
-		cadarea[i].facearea = fd[maxareaid].getArea();
-		cadarea[i].norm = fd[maxareaid].getFaceNormal();
+		Cluster tmp;
+		tmp.faceid.push_back(maxareaid);
+		tmp.facearea = fd[maxareaid].getArea();
+		tmp.norm = fd[maxareaid].getFaceNormal();
+		cadarea.push_back(tmp);
+		//cadarea[i].faceid.push_back(maxareaid);
+		//cadarea[i].facearea = fd[maxareaid].getArea();
+		//cadarea[i].norm = fd[maxareaid].getFaceNormal();
 		//std::cout << "ID  " << maxareaid << "  Area " << maxarea << std::endl;
 	}
 
-	qsort(cadarea, index, sizeof(Cluster), acompare);
+	qsort(&cadarea[0], index, sizeof(Cluster), acompare);
 
 
 
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < cadarea.size(); i++)
 	{
 		std::cout << "face ID :  " << cadarea[i].faceid[0] << " Normal  " << cadarea[i].norm << " facearea " << cadarea[i].facearea << std::endl;
 	}
 	std::cout << std::endl;
 
 
-
+	/*
 	for (int i = 0; i < fd.size(); i++)
 	{
 		std::vector <faceColor> color;
@@ -1270,7 +1395,7 @@ void Tri_Mesh::facepopCluster()
 		fc[i].ColorID = 11111;
 	}
 	count = 0;
-	/*
+	
 	for (int i = 0; i < index; i++)
 	{
 
@@ -1286,8 +1411,8 @@ void Tri_Mesh::facepopCluster()
 	}
 	*/
 
-	
-	for (int i = 0; i < index; i++)
+	/*
+	for (int i = 0; i <cadarea.size(); i++)
 	{
 
 		clusterMap[cadarea[i].faceid[0]] = false;
@@ -1300,7 +1425,7 @@ void Tri_Mesh::facepopCluster()
 		fc[cadarea[i].faceid[0]].ColorID = cadarea[i].faceid[0];
 		color.push_back(fc[cadarea[i].faceid[0]]);
 	}
-
+	*/
 	
 	
 
@@ -1320,7 +1445,7 @@ void Tri_Mesh::facepopCluster()
 			if (faceCheck[i] != 0) continue;
 			// Normal 相近的分群  設成同顏色
 			maxdot = -100;
-			for (int j = 0; j < index; j++)
+			for (int j = 0; j < cadarea.size(); j++)
 			{
 				if (maxdot < OpenMesh::dot(cadarea[j].norm, fd[i].getFaceNormal())) {
 
@@ -1335,8 +1460,8 @@ void Tri_Mesh::facepopCluster()
 				cadarea[maxcadid].faceid.push_back(i);
 			}
 
-				fc[i].Color = fc[maxdotid].Color;
-				fc[i].ColorID = maxdotid;
+			//	fc[i].Color = fc[maxdotid].Color;
+				//fc[i].ColorID = maxdotid;
 				faceCheck[i] = count;
 				clusterMap[i] = false;
 			
@@ -1345,59 +1470,60 @@ void Tri_Mesh::facepopCluster()
 
 	} while (!allCheck);
 	
-
-	std::cout << "cluster: " << index<<std::endl;
+	
+	std::cout << "cluster: " <<cadarea.size()<<std::endl;
 	bool sw =true;
 	if (sw)
 	{
-		planedistcluster(cadarea, index, output, &outputidx);
-		//Kmeans(fd, cadarea, &index, output, &outputidx, ctr);
-		for (int i = 0; i < fd.size(); i++)
+		planedistcluster(cadarea ,output);
+		std::cout << std::endl << "Clusters " << output.size() << std::endl;
+		//hypothesisplane(fd , output);
+
+		filtmincluster(fd, output);
+		//Refine(fd , output);
+		//filtminf(fd , output);
+		std::cout << std::endl << "Refine " << output.size() << std::endl;
+
+		for(int i =0 ; i < fc.size(); i++)
 		{
-			//if (fc[i].ColorID != fc[cadarea[1].faceid[0]].ColorID)
-		//	{
-			std::vector <faceColor> color;
 			fc[i].Color[0] = 1;
 			fc[i].Color[1] = 1;
 			fc[i].Color[2] = 1;
-			fc[i].ColorID = 11111;
-			//	}
+			fc[i].ColorID = -1;
 		}
 
 
+		std::cout << std::endl << "Refine " << output.size() << std::endl;
 
-		for (int i = 0; i < outputidx; i++)
+		for (int i = 0; i < output.size(); i++)
 		{
 			//std::cout << "index   :   " << i << std::endl;
-			clusterMap[output[i].faceid[0]] = false;
-			represent.push_back(output[i].faceid[0]);
-			faceCheck[output[i].faceid[0]] = count++;
-			std::vector <faceColor> color;
-			fc[output[i].faceid[0]].Color[0] = colormap[i][0];
-			fc[output[i].faceid[0]].Color[1] = colormap[i][1];
-			fc[output[i].faceid[0]].Color[2] = colormap[i][2];
-			fc[output[i].faceid[0]].ColorID = output[i].faceid[0];
-			color.push_back(fc[output[i].faceid[0]]);
-		}
 
-		for (int i = 0; i < outputidx; i++)
+				std::vector <faceColor> color;
+				fc[output[i].faceid[0]].Color[0] = colormap[i][0];
+				fc[output[i].faceid[0]].Color[1] = colormap[i][1];
+				fc[output[i].faceid[0]].Color[2] = colormap[i][2];
+				fc[output[i].faceid[0]].ColorID = output[i].faceid[0];
+				color.push_back(fc[output[i].faceid[0]]);
+			std::cout << fd[output[i].faceid[0]].getArea() << std::endl;
+		}
+		
+		for (int i = 0; i <output.size() ; i++)
 		{
 			for (int j = 0; j < output[i].faceid.size(); j++)
 			{
 				fc[output[i].faceid[j]].Color = fc[output[i].faceid[0]].Color;
-				fc[output[i].faceid[j]].ColorID = output[i].faceid[0];
+			fc[output[i].faceid[j]].ColorID = output[i].faceid[0];
 				//std::cout << "ID   " << fc[output[i].faceid[j]].ColorID << "   color   " << fc[output[i].faceid[j]].Color << std::endl;
 			}
 		}
-		std::cout <<std::endl<< "Clusters " << outputidx << std::endl;
-		for (int i = 0; i < outputidx; i++) 
-		{
-			//std::cout << "cluster  " << i << "   num  " << output[i].faceid.size() <<std::endl;
-		}
-	//	std::cout << std::endl;
+		//std::cout <<std::endl<< "Clusters " << output.size() << std::endl;
+
 	}
 	tend = std::clock();
 
+	
+	//contructbbox();
     float  time   ;
 	float min, sec;
 	time = (tend - tstart)/CLOCKS_PER_SEC ;
@@ -1412,8 +1538,14 @@ void Tri_Mesh::facepopCluster()
 		std::cout <<  sec << "  seconds " <<std::endl;
 	}
 }
-//<< "Y: " << normcacl[i].norm[1] << "Ｚ: " << normcacl[i].norm[2] 
 
+
+void Tri_Mesh::hypothesismesh()
+{
+	//bboxmesh[0].calFaceData();
+	bboxmesh[0].facefaceCount();
+	bboxmesh[0].facepopCluster();
+}
 
 void Tri_Mesh::findBoundary()
 {
@@ -1886,6 +2018,126 @@ void Tri_Mesh::saperateFace()
 	}
 
 	//std::cout << "------------face_saperate------------\n";
+}
+
+bool Tri_Mesh::isintriangle( Tri_Mesh *mesh , FIter fiter, OpenMesh::Vec3d pt )
+{
+	OpenMesh::Vec3d na, nb, nc;
+	float ra, rb, rc, rs;
+	float a, b, c , s;
+	std::vector <OpenMesh::Vec3d> fv;
+	
+	for (FVIter fvite = mesh->fv_iter(fiter); fvite; ++fvite)
+	{
+		//std::cout << "id  " <<  fvite.handle().idx() << "   ";
+		fv.push_back(mesh->point(fvite));
+	}
+
+	
+	na = OpenMesh::cross( fv[0]-pt,  fv[1]-pt);
+	nb = OpenMesh::cross(fv[1] - pt, fv[2] - pt);
+	nc = OpenMesh::cross(fv[2] - pt, fv[0] - pt);
+	ra = 0.5 * sqrtf(pow(na[0], 2)  + pow(na[1], 2) + pow(na[2], 2));
+	rb = 0.5 * sqrtf(pow(nb[0], 2) + pow(nb[1], 2) + pow(nb[2], 2));
+	rc = 0.5  * sqrtf(pow(nc[0], 2) + pow(nc[1], 2) + pow(nc[2], 2));
+	
+	
+	rs =mesh->fd[fiter.handle().idx()].getArea();
+
+	std::cout << "rs " << rs << std::endl;
+	std::cout << "abc " << ra + rb + rc << std::endl;
+	
+	a = ra / rs;
+	b = rb / rs;
+	c = rc / rs;
+	s = a + b + c;
+	if (   0.95< s && s <=1.0 && a > 0 && b > 0 && c > 0)
+	{
+		std::cout << "s " << s << std::endl;
+		return false;
+	}
+	else 
+	{
+		
+		//std::cout << "a " << a << std::endl;
+		//std::cout << "b " << b << std::endl;
+		//std::cout << "c " << c << std::endl;
+		//std::cout << "s " << c << std::endl;
+		std::cout << std::endl;
+		return true;
+	}
+}
+
+void Tri_Mesh::remesh()
+{
+
+	hypmesh = new Tri_Mesh;
+	bool out;
+	ReadFile("D:/Mesh-Face-Clustering/OpenMesh_EX/test.obj", hypmesh);
+	if (hypmesh)
+	{
+		std::cout << "load success " << std::endl;
+	}
+	
+	hypmesh->calFaceData();
+
+
+	
+	for (FIter f_iter = hypmesh->faces_begin(); f_iter != hypmesh->faces_end(); ++f_iter)
+	{
+		
+	for (int i = 0; i < fd.size(); i++)
+		{
+			out = isintriangle(hypmesh, f_iter, fd[i].getfcenter() );
+			if (!out)
+			{
+				break;
+			}
+		}
+
+		if (out)
+		{
+			hypmesh->delete_face(f_iter, true);
+			hypmesh->garbage_collection();
+			f_iter = hypmesh->faces_begin();
+		}	
+
+	}
+	
+	std::cout << std::endl << "face size  " << hypmesh->n_faces() << std::endl;
+	/*if (SaveFile("D:/Mesh-Face-Clustering/OpenMesh_EX/final.obj ", hypmesh))
+	{
+		std::cout << "Save file successful " << std::endl;
+	}
+	else 
+	{
+		std::cout << "Save file failed " << std::endl;
+	}*/
+	/*
+	int count = 0;
+	for (FIter f_iter = faces_begin(); f_iter != faces_end(); ++f_iter) 
+	{
+		count = 0;
+		for( FFIter ffit = ff_begin(f_iter); ffit ; ++ffit)
+		{
+			count++;
+		}
+		for (FEIter fe_iter = fe_begin(f_iter); fe_iter; ++fe_iter) 
+		{
+			HalfedgeHandle ehalf = halfedge_handle(fe_iter, 1);
+
+		}
+
+		std::cout << "count " << count << std::endl;
+		if ( count ==1 || count ==0) 
+		{
+			delete_face(f_iter);
+			garbage_collection();
+			f_iter = faces_begin();
+		}
+	
+	}
+	*/
 }
 
 void Tri_Mesh::findBoundary(int fid)
