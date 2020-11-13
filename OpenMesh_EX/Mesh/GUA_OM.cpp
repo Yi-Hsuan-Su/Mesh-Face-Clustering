@@ -1260,7 +1260,7 @@ std::vector <Cluster > Tri_Mesh::planedistcluster(std::vector <Cluster > cl , st
 						dist = calplanedist(fd[cl[i].faceid[j]].getFaceNormal(), fd[cl[i].faceid[j]].getfcenter(), fd[cl[i].faceid[k]].getfcenter());
 						//std::cout << dist << std::endl;
 						
-						if (dist <0.3)
+						if (dist <1)//0.08
 						{
 							facecheck[cl[i].faceid[k]] = true;
 							//output[*outputidx].faceid.push_back(cl[i].faceid[k]);
@@ -1378,7 +1378,7 @@ void Tri_Mesh::facepopCluster()
 
 
 
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < cadarea.size(); i++)
 	{
 		std::cout << "face ID :  " << cadarea[i].faceid[0] << " Normal  " << cadarea[i].norm << " facearea " << cadarea[i].facearea << std::endl;
 	}
@@ -1470,7 +1470,7 @@ void Tri_Mesh::facepopCluster()
 
 	} while (!allCheck);
 	
-
+	
 	std::cout << "cluster: " <<cadarea.size()<<std::endl;
 	bool sw =true;
 	if (sw)
@@ -1478,7 +1478,10 @@ void Tri_Mesh::facepopCluster()
 		planedistcluster(cadarea ,output);
 		std::cout << std::endl << "Clusters " << output.size() << std::endl;
 		//hypothesisplane(fd , output);
-		filtminf(fd , output);
+
+		filtmincluster(fd, output);
+		//Refine(fd , output);
+		//filtminf(fd , output);
 		std::cout << std::endl << "Refine " << output.size() << std::endl;
 
 		for(int i =0 ; i < fc.size(); i++)
@@ -1510,7 +1513,7 @@ void Tri_Mesh::facepopCluster()
 			for (int j = 0; j < output[i].faceid.size(); j++)
 			{
 				fc[output[i].faceid[j]].Color = fc[output[i].faceid[0]].Color;
-				fc[output[i].faceid[j]].ColorID = output[i].faceid[0];
+			fc[output[i].faceid[j]].ColorID = output[i].faceid[0];
 				//std::cout << "ID   " << fc[output[i].faceid[j]].ColorID << "   color   " << fc[output[i].faceid[j]].Color << std::endl;
 			}
 		}
@@ -1520,7 +1523,7 @@ void Tri_Mesh::facepopCluster()
 	tend = std::clock();
 
 	
-	contructbbox();
+	//contructbbox();
     float  time   ;
 	float min, sec;
 	time = (tend - tstart)/CLOCKS_PER_SEC ;

@@ -52,7 +52,21 @@ void faceData::cal_area()
 	double b = (vertices[1] - vertices[2]).length();
 	double c = (vertices[0] - vertices[2]).length();
 	double s = (a + b + c) / 2.0;
+	double sa, sb, sc;
+	sa = s - a;
+	sb = s - b;
+	sc = s - c;
 	area = sqrt(s * (s - a) * (s - b) * (s - c));
+	/*
+	std::cout << "a   " << a << std::endl;
+	std::cout << "b   " << b << std::endl;
+	std::cout << "c   " << c << std::endl;
+	std::cout << "s   " << s << std::endl;
+	std::cout << "sa   " << sa << std::endl;
+	std::cout << "sb  " << sb << std::endl;
+	std::cout << "sb   " << sc << std::endl;
+	std::cout << "area   " << area << std::endl;
+	*/
 	if (area < faceIgnore) allowFace = false;
 	else allowFace = true;
 }

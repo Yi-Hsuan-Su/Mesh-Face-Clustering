@@ -15,7 +15,9 @@ inline double calecldistance(OpenMesh::Vec3d cur, OpenMesh::Vec3d gl)
 {
 	// sqrt(pow((gl[0] - cur[0]), 2) + pow((gl[1] - cur[1]), 2) + pow((gl[2] - cur[2]), 2));
 	//std::cout << "dist  " << sqrt(pow((gl[0] - cur[0]), 2) + pow((gl[1] - cur[1]), 2) + pow((gl[2] - cur[2]), 2)) << std::endl;
-	return pow((gl[0] - cur[0]), 2) + pow((gl[1] - cur[1]), 2) + pow((gl[2] - cur[2]), 2);
+	//std::cout << cur <<  std::endl;
+	//std::cout << gl << std::endl;
+	return sqrt( pow((cur[0]- gl[0] ), 2) + pow(( cur[1]- gl[1] ), 2) + pow(( cur[2] - gl[2] ), 2)) ;
 }
 
 inline double calplanedist( OpenMesh::Vec3d normal , OpenMesh::Vec3d center,OpenMesh::Vec3d qpoint)
